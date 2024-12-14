@@ -3,8 +3,8 @@ using System.IO;
 using System.Numerics;
 
 
-//FileStream fileStream = new FileStream("resources\\task_1_n10_m2_k2.txt", FileMode.Open);
-string path = "C:\\Users\\whati\\source\\repos\\SpecSeminar1\\SpecSeminar4\\resources\\task_1_n10_m2_k2.txt";
+//FileStream fileStream = new FileStream("resources\\task_1_n10_m2_k2.txt", FileMode.Open);task_4_n40_m4_k3.txt task_5_n250_m10_k6.txt
+string path = "C:\\Users\\whati\\source\\repos\\SpecSeminar1\\SpecSeminar4\\resources\\task_3_n90_m6_k4.txt";
 List<Order> orders = new List<Order>();
 KeyValuePair<int, int> mAndK = getDataFromFile(orders, path);
 List<int> localBaseIterResults = new List<int>();
@@ -104,45 +104,6 @@ KeyValuePair<int, int> getDataFromFile(List<Order> orders, string path)
     }
     
 }
-
-/*KeyValuePair<int, int> getDataFromFile(List<Order> orders, string path)
-{
-    
-    int n = 10;
-    int m = 2;
-    int k = 2;
-
-    for (int i = 0; i < k; i++)
-    {
-        List<int> V = new List<int>();
-        for (int j = 1; j < 6; j++) V.Add(j);
-
-        Dictionary<int, List<int>> A = getintListMap(new string[] { "(3,5)", "(2,5)", "(2,3)", "(2,4)", "(1,4)", "(4,5)", "(3,4)" });
-
-        Dictionary<int, int> r = new Dictionary<int, int>()
-        {
-            {1, 1},
-            {2, 1},
-            {3, 1},
-            {4, 1},
-            {5, 2}
-        };
-        Dictionary<int, int> t = new Dictionary<int, int>() 
-        {
-            {1, 6},
-            {2, 7},
-            {3, 1},
-            {4, 4},
-            {5, 4}
-        };
-
-        int tRN = 15,
-            tD = 23;
-        orders.Add(new Order(V, A, r, t, tRN, tD));
-    }
-
-    return new KeyValuePair<int, int>(m, k);
-}*/
 
 static Dictionary<int, List<int>> getintListMap(string[] stringA)
 {

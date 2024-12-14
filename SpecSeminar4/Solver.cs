@@ -39,26 +39,24 @@ namespace SpecSeminar4
             while (!(eventSet.Count == 0))
             {
                 List<Operation> front;
+                front = frontalAlgorithm(eventSet.First(), orders);
 
-                while (!((front = frontalAlgorithm(eventSet.First(), orders)).Count == 0)) // колво операция которое можешь выполнить в определенный момент времени
+                while (front.Count != 0) // колво операция которое можешь выполнить в определенный момент времени
                 {
 
                     frontSort(front, orders, strategy, eventSet.First());
-/*
-                    foreach (Operation op in front)
-                        Console.WriteLine(op.number + " " + op.orderId);*/
-
 
                     Operation operationToStart = front.First();
                     Order orderOfOperation = orders.ElementAt(operationToStart.orderId);
+
+                    if (resourcesState[orderOfOperation.resources.GetValueOrDefault(operationToStart.number)].freeTime != -1)
+                    { front.Remove(front.First()); continue; }
 
                     int resourceFreeTime = eventSet.First() + orderOfOperation.duration.GetValueOrDefault(operationToStart.number);
                     eventSet.Add(resourceFreeTime);
 
                     resourcesState[orderOfOperation.resources.GetValueOrDefault(operationToStart.number)] = new ResourceState(resourceFreeTime, operationToStart);
-
-                    if (front.Count == 1)
-                        break;
+                    front.Remove(front.First());
                 }
                 eventSet.Remove(eventSet.First());
             }
@@ -87,19 +85,19 @@ namespace SpecSeminar4
                 front = frontalAlgorithm(eventSet.First(), orders);
 
                 while (front.Count != 0)
-                {  
+                {
 
                     frontSort(front, orders, strategy, eventSet.First()); // в базовой версии приоритетно берется меньшее директивное время
                     Operation operationToStart = front.First();
                     Order orderOfOperation = orders.ElementAt(operationToStart.orderId);
                     if (resourcesState[orderOfOperation.resources.GetValueOrDefault(operationToStart.number)].freeTime != -1)
-                    { front.Remove(front.First()); break; }
+                    { front.Remove(front.First()); continue; }
 
                     int resourceFreeTime = eventSet.First() + orderOfOperation.duration.GetValueOrDefault(operationToStart.number);
                     eventSet.Add(resourceFreeTime);
 
                     resourcesState[orderOfOperation.resources.GetValueOrDefault(operationToStart.number)] = new ResourceState(resourceFreeTime, operationToStart);
-
+                    front.Remove(front.First());
                 }
                 eventSet.Remove(eventSet.First());
             }
@@ -140,15 +138,16 @@ namespace SpecSeminar4
             else if (strategy == SortingStrategy.BiggestNextVertexes)
             {
                 double k1 = 0.5, k2 = 1 - k1;
-                front.Sort((op1, op2) => {
+                front.Sort((op1, op2) =>
+                {
+                    List<int> edges1 = orders.ElementAt(op1.orderId).edges.GetValueOrDefault(op1.number);
+                    List<int> edges2 = orders.ElementAt(op2.orderId).edges.GetValueOrDefault(op2.number);
 
                     double priority1 = k1 * orders.ElementAt(op1.orderId).directiveTime
-                            + (-k2) * (!orders.ElementAt(op1.orderId).edges.ContainsKey(op1.number) ?
-                            0 : orders.ElementAt(op1.orderId).edges.GetValueOrDefault(op1.number).Count);
+                    + -k2 * (edges1 == null ? 0 : edges1.Count);
 
                     double priority2 = k1 * orders.ElementAt(op2.orderId).directiveTime
-                            + (-k2) * (!orders.ElementAt(op2.orderId).edges.ContainsKey(op2.number) ?
-                            0 : orders.ElementAt(op2.orderId).edges.GetValueOrDefault(op2.number).Count);
+                    + -k2 * (edges2 == null ? 0 : edges2.Count);
 
                     return priority1.CompareTo(priority2);
                 });
@@ -163,7 +162,8 @@ namespace SpecSeminar4
 
                 double k1 = 0.8, k2 = 1 - k1;
 
-                front.Sort((op1, op2) => {
+                front.Sort((op1, op2) =>
+                {
                     List<int> edges1 = orders.ElementAt(op1.orderId).edges.GetValueOrDefault(op1.number);
                     List<int> edges2 = orders.ElementAt(op2.orderId).edges.GetValueOrDefault(op2.number);
 
