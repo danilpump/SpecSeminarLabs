@@ -8,36 +8,39 @@ namespace SpecSeminar5
 {
     internal class PointGroup
     {
-        public int clustersCount = 0;
-        public Dictionary<int, Cluster> dict;
+        public int targetClCount = 0;
+        public Dictionary<int, Cluster> Clusters;
 
-        public PointGroup()
+        public PointGroup(int clC)
         {
-            dict = new Dictionary<int, Cluster>();
+            Clusters = new Dictionary<int, Cluster>();
+            targetClCount = clC;
         }
 
         public PointGroup(PointGroup pg)
         {
-            dict = new Dictionary<int, Cluster>();
-            foreach(KeyValuePair<int, Cluster> cl in pg.dict)
-                this.dict.Add(cl.Key, cl.Value);
+            Clusters = new Dictionary<int, Cluster>();
+            foreach(KeyValuePair<int, Cluster> cl in pg.Clusters)
+                this.Clusters.Add(cl.Key, cl.Value);
         }
 
         public void AddPoint(int clusterIndex, Point p) 
         {
-            if (clusterIndex == p.index) throw new Exception();
-            dict[clusterIndex].Add(p);          
+            if (clusterIndex == p.index)
+                CreateCluster(p);
+            Clusters[clusterIndex].Add(p);          
         }
-        public void CreateCluster(int clusterIndex)
+        public void CreateCluster(Point cl)
         {
-            dict.Add(clusterIndex, new Cluster(new List<Point>(), clusterIndex));
+            Clusters.Add(cl.index, new Cluster(new List<Point>(), cl));
+            //clustersCount++;
         }
 
         public void Print()
         {
             Console.Write("{ ");
-            foreach (KeyValuePair<int,Cluster> cl in dict)
-            { Console.Write(cl.Value.index + " "); cl.Value.Print(); }
+            foreach (KeyValuePair<int,Cluster> cl in Clusters)
+            { Console.Write(cl.Value.point.index + " "); cl.Value.Print(); }
             Console.WriteLine(" }");
         }
 

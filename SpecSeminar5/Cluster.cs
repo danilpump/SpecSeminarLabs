@@ -8,18 +8,18 @@ namespace SpecSeminar5
 {
     internal class Cluster
     {
-        public int index;
+        public Point point;
         public List<Point> list;
 
-        public Cluster(List<Point> list, int index)
+        public Cluster(List<Point> list, Point point)
         {
             this.list = list;
-            this.index = index;
+            this.point = point;
         }
 
         public void Add(Point p)
         {
-            if (index == p.index) throw new Exception();
+            //if (point.index == p.index) throw new Exception();
             list.Add(p);
         }
 
