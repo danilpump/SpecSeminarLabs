@@ -1,4 +1,5 @@
 ﻿using SpecSeminar5;
+using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 
 /*Point p = new(0, 0, 0);
@@ -8,8 +9,7 @@ Console.WriteLine("Distance is: " + calculateDistance(p, p2));*/
 
 
 int k = 38;
-PointGroup pointGr = new PointGroup(38);
-List<Point> lp = new List<Point>() {
+List<Point> listPoints = new List<Point>() {
     new Point(1, 11003.611100f, 42102.500000f),
     new Point(2, 11108.611100f, 42373.888900f),
     new Point(3, 11133.333300f, 42885.833300f),
@@ -47,31 +47,64 @@ List<Point> lp = new List<Point>() {
     new Point(35, 12372.777800f, 42711.388900f),
     new Point(36, 12386.666700f, 43334.722200f)
 };
+PointGroup pointGrp = new PointGroup(38);
 
-Point[] points = maxDistancedPoints(lp/*pointGr.dict.First().Value.list*/); // для начала узнаем самые удаленные друг от друга точки
-pointGr.AddPoint(points[0].index, points[0]);
-pointGr.AddPoint(points[1].index, points[1]);
+Point[] points1 = maxDistancedPoints(listPoints/*pointGr.dict.First().Value.list*/); // для начала узнаем самые удаленные друг от друга точки
+pointGrp.AddPoint(points1[0].index, points1[0]);
+pointGrp.AddPoint(points1[1].index, points1[1]);
 
-while (pointGr.Clusters.Count < pointGr.targetClCount)
+while (pointGrp.Clusters.Count < pointGrp.targetClCount)
 {
     Point temp1 = null;
     
-    temp1 = maxDistancedPoint2(lp, pointGr.Clusters);
-    pointGr.AddPoint(temp1.index, temp1);
+    temp1 = maxDistancedPoint2(listPoints, pointGrp.Clusters);
+    pointGrp.AddPoint(temp1.index, temp1);
 }
 
-foreach (Point p in lp)
+foreach (Point p in listPoints)
 {
     Cluster tempCl1 = null;
     
-    if (pointGr.Clusters.Any(el => el.Value.point.Equals(p))) // Исключаем добавления самой себя
+    if (pointGrp.Clusters.Any(el => el.Value.point.Equals(p))) // Исключаем добавления самой себя
         continue;
          
-    tempCl1 = minDistancedCluster(pointGr.Clusters, p);//вычисляем мин отд кластер
-    
+    tempCl1 = minDistancedCluster(pointGrp.Clusters, p);//вычисляем мин отд кластер    
     tempCl1.Add(p); // добавляем точку в мин отд кластер
 }
 
+Reduce(pointGrp, clustersToPoints(pointGrp.Clusters));
+void Reduce(PointGroup pg, List<Point> lp)
+{
+    if (pg.targetClCount / 4 == 0)
+        throw new Exception();
+    PointGroup pointGr = new PointGroup(pg.targetClCount/4);
+    Point[] points = maxDistancedPoints(lp); // для начала узнаем самые удаленные друг от друга точки
+    pointGr.AddPoint(points[0].index, points[0]);
+    pointGr.AddPoint(points[1].index, points[1]);
+
+    while (pointGr.Clusters.Count < pointGr.targetClCount)
+    {
+        Point temp1 = maxDistancedPoint2(lp, pointGr.Clusters);
+        pointGr.AddPoint(temp1.index, temp1);
+    }
+
+    foreach (Point p in lp)
+    {
+        if (pointGr.Clusters.Any(el => el.Value.point.Equals(p))) // Исключаем добавления самой себя
+            continue;
+
+        Cluster tempCl1 = minDistancedCluster(pointGr.Clusters, p);//вычисляем мин отд кластер    
+        tempCl1.Add(p); // добавляем точку в мин отд кластер
+    }
+}
+List<Point> clustersToPoints(Dictionary<int, Cluster> clPoints) 
+{
+    List<Point> list = new List<Point>();
+
+    foreach (KeyValuePair<int, Cluster> cl in clPoints)
+        list.Add(cl.Value.point);
+    return list;
+}
 Point maxDistancedPoint(Cluster cl, Point point)
 {
     if (cl.list == null) return null;
@@ -85,7 +118,6 @@ Point maxDistancedPoint(Cluster cl, Point point)
         }
     return p2;
 }
-
 Cluster minDistancedCluster(Dictionary<int, Cluster> clPoints, Point point)
 {
     if (clPoints == null) return null;
@@ -99,7 +131,6 @@ Cluster minDistancedCluster(Dictionary<int, Cluster> clPoints, Point point)
         }
     return cl2;
 }
-
 Point maxDistancedPoint2(List<Point> cl, Dictionary<int, Cluster> clPoints)
 {
     if (cl == null) return null;
@@ -120,7 +151,6 @@ Point maxDistancedPoint2(List<Point> cl, Dictionary<int, Cluster> clPoints)
     }
     return p2;
 }
-
 Point[] maxDistancedPoints(List<Point> cl)
 {
     if (cl == null) return null;
@@ -136,33 +166,9 @@ Point[] maxDistancedPoints(List<Point> cl)
             }
     return points;
 }
-
 float calculateDistance(Point p1, Point p2)
 {
     return (float)Math.Sqrt(Math.Pow(p1.x - p2.x, 2) + Math.Pow(p1.y - p2.y, 2));
-}
-
-void Reduce(PointGroup pg)
-{
-    //todo
-    PointGroup pointGroup = new PointGroup(pg);
-    int count = pointGroup.targetClCount;
-
-    Point[] points = maxDistancedPoints(pointGroup.Clusters.First().Value.list); // для начала узнаем самые удаленные друг от друга точки
-    count += 2;
-
-
-
-    /*foreach (KeyValuePair<int, Cluster> cl in pointGroup.dict)
-        foreach (Point p in cl.Value.list)
-            maxDistancedPoint(cl.Value, p);*/
-
-    while (count < pg.targetClCount)
-    {
-        foreach (KeyValuePair<int, Cluster> cl in pointGroup.Clusters)
-            foreach (Point p in cl.Value.list)
-                maxDistancedPoint2(cl.Value.list, p);
-    }
 }
 
 void Expand(PointGroup pg)
