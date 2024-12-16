@@ -19,6 +19,12 @@ namespace SpecSeminar5
             this.y = y;
             this.index = index;
         }
+        public Point(Point point)
+        {
+            this.x = point.x;
+            this.y = point.y;
+            this.index = point.index;
+        }
 
         public override bool Equals(object? obj)
         {
