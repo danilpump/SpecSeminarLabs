@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpecSeminar5
 {
-    internal class PointGroup
+    class PointGroup
     {
         public int targetClCount = 0;
         public Dictionary<int, Cluster> Clusters;
@@ -22,6 +22,7 @@ namespace SpecSeminar5
             Clusters = new Dictionary<int, Cluster>();
             foreach(KeyValuePair<int, Cluster> cl in pg.Clusters)
                 this.Clusters.Add(cl.Key, cl.Value);
+            targetClCount = pg.targetClCount;
         }
 
         public void AddPoint(int clusterIndex, Point p) 

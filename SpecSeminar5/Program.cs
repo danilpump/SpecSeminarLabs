@@ -1,6 +1,7 @@
 ﻿using SpecSeminar5;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Runtime.ConstrainedExecution;
 
 int k = 36;
 /*List<Point> listPoints = new List<Point>() {
@@ -56,40 +57,120 @@ List<Point> listPoints = new List<Point>() {
     new Point(8, 4, 5)
 };
 
+List<PointGroup> iterations = new List<PointGroup>();
 PointGroup pointGrp = new PointGroup(8);
 
-/*List<Point> listPoints2 = new(listPoints);
-Point[] points1 = maxDistancedPoints(listPoints2); // для начала узнаем самые удаленные друг от друга точки
-pointGrp.AddPoint(points1[0].index, points1[0]);
-listPoints2.Remove(points1[0]);
-pointGrp.AddPoint(points1[1].index, points1[1]);
-listPoints2.Remove(points1[1]);
+List<Point> totalPath = new List<Point>();
+List<Point> tempPath = new List<Point>();
+PointGroup _gr = new PointGroup(8);
 
-while (pointGrp.Clusters.Count < pointGrp.targetClCount)
+_gr = Reduce(pointGrp, listPoints, 4);
+iterations.Add(new PointGroup(_gr));
+
+while (true)
 {
-    Point temp1 = maxDistancedPoint2(listPoints2, pointGrp.Clusters);
-    pointGrp.AddPoint(temp1.index, temp1);
-    listPoints2.Remove(temp1);
+    _gr = Reduce(_gr, clustersToPoints(_gr.Clusters), _gr.targetClCount / 2);
+    if (_gr is null) break;
+    iterations.Add(new PointGroup(_gr));
+} // здесь редуцируем исходную задачу и записываем каждый шаг в список iterations
+
+
+iterations.Reverse();
+
+foreach (var el in iterations)
+{
+    //здесь сортируем кластеры в порядке, указанном в пути (только для последнего)
+    _gr = calculateOrder(el, tempPath);
+
+    // Находим ближайшие точки в соседних кластерах на маршруте и указываем их как стартовые и конечные
+    nearestPoints(_gr);
+
+    // найти маршрут внутри каждого кластера (с указанными sp и ep)
+    // полученный маршрут применим к следующей итерации
+    tempPath = findPathInClusters(_gr);
 }
 
-foreach (Point p in listPoints2)
+
+
+float result = 0;
+for (int i = 0; i < tempPath.Count; i++)
 {
-    Cluster tempCl1 = null;
+    Point p1 = tempPath.ElementAt(i);
+    Point p2;
+    if (i == tempPath.Count - 1)
+        p2 = tempPath.ElementAt(0);
+    else
+        p2 = tempPath.ElementAt(i + 1);
+    result += calculateDistance(p1, p2);
+}
 
-    if (pointGrp.Clusters.Any(el => el.Value.point.Equals(p))) // Исключаем добавления самой себя
-        continue;
-
-    tempCl1 = minDistancedCluster(pointGrp.Clusters, p);//вычисляем мин отд кластер    
-    tempCl1.Add(p); // добавляем точку в мин отд кластер
-}*/
-
-List<Point> path = new List<Point>();
-
-PointGroup group1 = Reduce(pointGrp, listPoints, 4);
-PointGroup group2 = Reduce(group1, clustersToPoints(group1.Clusters), group1.targetClCount / 2);
-PointGroup group3 = Reduce(group2, clustersToPoints(group2.Clusters), group2.targetClCount / 2);
+Console.WriteLine(result);
+foreach (var el in tempPath)
+    Console.Write(el.ToString() + " ");
 Console.WriteLine();
-calculatePath2(group3);
+
+//----------------------------------------------------------------------
+
+
+
+
+PointGroup calculateOrder(PointGroup tmp, List<Point> path) 
+{
+    PointGroup _pg = new(tmp);
+    _pg.Clusters.Clear();
+    foreach (var el in path)
+        _pg.Clusters.Add(el.index, tmp.Clusters.GetValueOrDefault(el.index));
+    return _pg;
+} //здесь сортируем кластеры в порядке, указанном в пути (только для последнего)
+
+void nearestPoints(PointGroup group) 
+{
+    for (int i = 0; i < group.Clusters.Count; i++)
+    {
+        Cluster tempL1 = group.Clusters.ElementAt(i).Value;
+        Cluster tempL2;
+        if (i == group.Clusters.Count - 1)
+            tempL2 = group.Clusters.ElementAt(0).Value;
+        else
+            tempL2 = group.Clusters.ElementAt(i + 1).Value;
+
+        Point pointS = null, pointE = null;
+        float min = float.MaxValue;
+        foreach (var endP in tempL1.list)
+        {
+            Point startP = minDistancedPoint(tempL2.list, endP);
+            if ((tempL2.endPoint == startP) && tempL2.list.Count != 1)
+            {
+                Cluster cl = new(tempL2);
+                cl.list.Remove(startP);
+                startP = minDistancedPoint(cl.list, endP);
+            }
+            float locMin = calculateDistance(startP, endP);
+            if (min > locMin &&
+                ((tempL2.endPoint != startP) || tempL2.list.Count == 1) &&
+                ((tempL1.startPoint != endP) || tempL1.list.Count == 1))
+            {
+                min = locMin;
+                pointS = startP;
+                pointE = endP;
+            }
+        }
+
+        tempL1.endPoint = pointE;
+        tempL2.startPoint = pointS;
+    }
+}// Находим ближайшие точки в соседних кластерах на маршруте и указываем их как стартовые и конечные
+List<Point> findPathInClusters(PointGroup group) 
+{
+        List<Point> localPath = new List<Point>();
+    for (int i = 0; i < group.Clusters.Count; i++)
+    {
+        Cluster curCluster = group.Clusters.ElementAt(i).Value;
+        localPath.AddRange(curCluster.calculatePathGreedy());
+    }
+    return localPath;
+} // найти маршрут внутри каждого кластера (с указанными sp и ep)
+// полученный маршрут применим к следующей итерации
 
 /*List<Point> calculatePath(PointGroup pg) 
 {
@@ -164,8 +245,8 @@ PointGroup Reduce(PointGroup pg, List<Point> _lp, int _k)
     List<Point> lp = new(_lp);
     if (_k < 2)
     {
-        path = calculatePath2(pg);
-        throw new Exception(); // функция расчета пути для задачи
+        tempPath = calculatePath2(pg);
+        return null; // функция расчета пути для задачи
     }
     PointGroup pointGr = new PointGroup(_k);
     Point[] points = maxDistancedPoints(lp); // для начала узнаем самые удаленные друг от друга точки
@@ -197,15 +278,15 @@ List<Point> clustersToPoints(Dictionary<int, Cluster> clPoints)
         list.Add(cl.Value.point);
     return list;
 }
-Point maxDistancedPoint(Cluster cl, Point point)
+Point minDistancedPoint(List<Point> cl, Point point)
 {
-    if (cl.list == null) return null;
-    float max = 0;
+    if (cl == null) return null;
+    float min = float.MaxValue;
     Point p2 = null;
-    foreach (Point _p in cl.list)
-        if (max < calculateDistance(point, _p))
+    foreach (Point _p in cl)
+        if (min > calculateDistance(point, _p))
         {
-            max = calculateDistance(point, _p);
+            min = calculateDistance(point, _p);
             p2 = _p;
         }
     return p2;

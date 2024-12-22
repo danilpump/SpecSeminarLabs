@@ -32,5 +32,9 @@ namespace SpecSeminar5
             return false;
         }
         public override int GetHashCode() => index.GetHashCode();
+        public override string ToString()
+        {
+            return "(" + x + ";" + y + ")";
+        }
     }
 }
