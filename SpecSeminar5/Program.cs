@@ -1,6 +1,7 @@
 ﻿using SpecSeminar5;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.IO;
 using System.Runtime.ConstrainedExecution;
 
 int k = 36;
@@ -43,10 +44,31 @@ int k = 36;
     new Point(36, 12386.666700f, 43334.722200f),
     new Point(37, 12421.666700f, 42895.555600f),
     new Point(38, 12645.000000f, 42973.333300f)
-
 };*/
 
-List<Point> listPoints = new List<Point>() {
+string fPath = "C:\\Users\\whati\\source\\repos\\SpecSeminar1\\SpecSeminar5\\resources\\131.txt";
+
+List<Point> listPoints = getDataFromFile(fPath, out k);
+List <Point> getDataFromFile(string filePath, out int _k) 
+{
+    using (StreamReader sr = File.OpenText(filePath))
+    {
+        string s = sr.ReadLine();
+        _k = Convert.ToInt32(s);
+
+        List<Point> _listPoints = new List<Point>();
+        while ((s = sr.ReadLine()) != null)
+        {
+            string[] str = s.Split(" ");
+            _listPoints.Add(new Point(Convert.ToInt32(str[0]),
+            (float)Convert.ToDouble(str[1]),
+            (float)Convert.ToDouble(str[2])));
+        }
+        return _listPoints;
+    }
+}
+
+/*List<Point> listPoints = new List<Point>() {
     new Point(1, 0, 0),
     new Point(2, 2, 3),
     new Point(3, 5, 1),
@@ -55,21 +77,21 @@ List<Point> listPoints = new List<Point>() {
     new Point(6, 3, 9),
     new Point(7, 1, 7),
     new Point(8, 4, 5)
-};
+};*/
 
 List<PointGroup> iterations = new List<PointGroup>();
-PointGroup pointGrp = new PointGroup(8);
+PointGroup pointGrp = new PointGroup(k);
 
 List<Point> totalPath = new List<Point>();
 List<Point> tempPath = new List<Point>();
-PointGroup _gr = new PointGroup(8);
+PointGroup _gr = new PointGroup(k);
 
-_gr = Reduce(pointGrp, listPoints, 4);
+_gr = Reduce(pointGrp, listPoints, k/16);
 iterations.Add(new PointGroup(_gr));
 
 while (true)
 {
-    _gr = Reduce(_gr, clustersToPoints(_gr.Clusters), _gr.targetClCount / 2);
+    _gr = Reduce(_gr, clustersToPoints(_gr.Clusters), _gr.targetClCount / 16);
     if (_gr is null) break;
     iterations.Add(new PointGroup(_gr));
 } // здесь редуцируем исходную задачу и записываем каждый шаг в список iterations
@@ -107,7 +129,7 @@ for (int i = 0; i < tempPath.Count; i++)
 Console.WriteLine(result);
 foreach (var el in tempPath)
     Console.Write(el.ToString() + " ");
-Console.WriteLine();
+Console.ReadLine();
 
 //----------------------------------------------------------------------
 
@@ -119,7 +141,7 @@ PointGroup calculateOrder(PointGroup tmp, List<Point> path)
     PointGroup _pg = new(tmp);
     _pg.Clusters.Clear();
     foreach (var el in path)
-        _pg.Clusters.Add(el.index, tmp.Clusters.GetValueOrDefault(el.index));
+        _pg.Clusters.TryAdd(el.index, tmp.Clusters.GetValueOrDefault(el.index));
     return _pg;
 } //здесь сортируем кластеры в порядке, указанном в пути (только для последнего)
 
@@ -243,7 +265,7 @@ List<List<Point>> ShowAllCombinations(List<Point> arr, List<List<Point>> list = 
 PointGroup Reduce(PointGroup pg, List<Point> _lp, int _k)
 {
     List<Point> lp = new(_lp);
-    if (_k < 2)
+    if (_k < 8)
     {
         tempPath = calculatePath2(pg);
         return null; // функция расчета пути для задачи
