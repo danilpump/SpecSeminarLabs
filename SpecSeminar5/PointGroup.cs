@@ -31,6 +31,14 @@ namespace SpecSeminar5
                 CreateCluster(p);
             Clusters[clusterIndex].Add(p);          
         }
+
+        public void AddPointWR(int clusterIndex, Point p)
+        {
+            if (clusterIndex == p.index)
+                CreateCluster(p);
+            Clusters[clusterIndex].AddWR(p);
+        }
+
         public void CreateCluster(Point cl)
         {
             Clusters.Add(cl.index, new Cluster(new List<Point>(), cl));

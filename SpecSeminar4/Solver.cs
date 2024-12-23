@@ -66,7 +66,7 @@ namespace SpecSeminar4
             for (int i = 0; i < orders.Count; i++)
             {
                 int delay = orders.ElementAt(i).completionTime > orders.ElementAt(i).directiveTime ? orders.ElementAt(i).completionTime - orders.ElementAt(i).directiveTime : 0;
-                Console.WriteLine("Заказ №" + (i + 1) + " Просрочка " + delay);
+                //Console.WriteLine("Заказ №" + (i + 1) + " Просрочка " + delay);
                 sumOfDelay += delay;
             }
 
@@ -107,7 +107,7 @@ namespace SpecSeminar4
             for (int i = 0; i < orders.Count; i++)
             {
                 int delay = orders.ElementAt(i).completionTime > orders.ElementAt(i).directiveTime ? orders.ElementAt(i).completionTime - orders.ElementAt(i).directiveTime : 0;
-                Console.WriteLine("Заказ №" + (i + 1) + " Просрочка " + delay);
+                //Console.WriteLine("Заказ №" + (i + 1) + " Просрочка " + delay);
                 delays.Add(delay);
             }
 
@@ -231,8 +231,8 @@ namespace SpecSeminar4
                     }
                 }
             }
-            Console.WriteLine("Время " + time);
-            Console.WriteLine("Результат " + result);
+            /*Console.WriteLine("Время " + time);
+            Console.WriteLine("Результат " + result);*/
 
             return result;
         }

@@ -4,7 +4,7 @@ using System.Numerics;
 
 
 //FileStream fileStream = new FileStream("resources\\task_1_n10_m2_k2.txt", FileMode.Open);task_4_n40_m4_k3.txt task_5_n250_m10_k6.txt
-string path = "C:\\Users\\whati\\source\\repos\\SpecSeminar1\\SpecSeminar4\\resources\\task_3_n90_m6_k4.txt";
+string path = "C:\\Users\\whati\\source\\repos\\SpecSeminar1\\SpecSeminar4\\resources\\task_10_n1000_m20_k11.txt";
 List<Order> orders = new List<Order>();
 KeyValuePair<int, int> mAndK = getDataFromFile(orders, path);
 List<int> localBaseIterResults = new List<int>();

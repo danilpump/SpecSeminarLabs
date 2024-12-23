@@ -33,9 +33,16 @@ namespace SpecSeminar5
         {
             //if (point.index == p.index) throw new Exception();
             list.Add(p);
-            //пересчет центра кластера
+        }
+
+        public void AddWR(Point p)
+        {
+            //if (point.index == p.index) throw new Exception();
+            list.Add(p);
+
             RecalculateCenter();
         }
+
         private void RecalculateCenter()
         {
             float x = 0;
